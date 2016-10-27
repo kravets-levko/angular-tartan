@@ -1,5 +1,7 @@
 'use strict';
 
-var angular = require('angular');
+var _ = require('lodash');
 
-angular.module('angular-tartan', []);
+_.extend(module.exports, require('./package'));
+
+require('./directives');
