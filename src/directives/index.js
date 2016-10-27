@@ -1,6 +1,6 @@
 'use strict';
 
 require('./tartan');
-require('./tartan-preset');
+require('./tartan-schema');
 require('./tartan-render-image');
 require('./tartan-format');

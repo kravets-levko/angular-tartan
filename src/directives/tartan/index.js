@@ -4,6 +4,10 @@ var _ = require('lodash');
 var EventEmitter = require('events');
 var module = require('../../module');
 
+function stub() {
+  return null;
+}
+
 module.directive('tartan', [
   function() {
     return {
@@ -21,14 +25,16 @@ module.directive('tartan', [
           // Allow controller to have events
           _.extend(self, new EventEmitter());
 
-          var parser = null;
+          var parser = stub;
+          var formatter = stub;
           var sett = null;
 
           function update() {
             sett = null;
             if (parser && $scope.source) {
               sett = parser($scope.source);
-              self.emit('tartan.changed', $scope.source, sett);
+              self.emit('tartan.changed', $scope.source, sett,
+                formatter(sett));
             }
           }
 
@@ -36,8 +42,13 @@ module.directive('tartan', [
             return sett;
           };
 
-          this.setParser = function(newParser) {
-            parser = _.isFunction(newParser) ? newParser : null;
+          this.setParser = function(value) {
+            parser = _.isFunction(value) ? value : stub;
+            update();
+          };
+
+          this.setFormatter = function(value) {
+            formatter = _.isFunction(value) ? value : stub;
             update();
           };
 

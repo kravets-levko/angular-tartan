@@ -13,22 +13,8 @@ module.directive('tartanFormat', [
       scope: {},
       link: function($scope, element, attr, controller) {
         var target = element.find('pre');
-        var format = tartan.render.format({
-          outputOnlyUsedColors: true
-        });
-
-        function update(sett) {
-          if (_.isObject(sett)) {
-            target.text(format(sett));
-          } else {
-            target.text('');
-          }
-        }
-
-        update(controller.getSett());
-
-        controller.on('tartan.changed', function(source, sett) {
-          update(sett);
+        controller.on('tartan.changed', function(source, sett, formatted) {
+          target.text(formatted);
         });
       }
     };

@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('lodash');
 var tartan = require('tartan');
 var module = require('../../module');
 
@@ -56,23 +57,26 @@ module.directive('tartanRenderImage', [
       require: '^^tartan',
       template: '<canvas></canvas>',
       replace: false,
-      scope: {},
+      scope: {
+        options: '=?'
+      },
       link: function($scope, element, attr, controller) {
         var target = element.find('canvas').get(0);
         var render = null;
         var offset = {x: 0, y: 0};
+        var lastSett = null;
 
         var repaint = tartan.helpers.repaint(function() {
           offset = render(target, offset);
         });
 
         function update(sett) {
+          lastSett = sett;
           if (_.isObject(sett)) {
-            render = tartan.render.canvas(sett, {
-              skipUnsupportedTokens: true,
-              skipInvalidColors: true,
+            var options = _.extend({}, $scope.options, {
               transformSett: tartan.transform.flatten()
             });
+            render = tartan.render.canvas(sett, options);
             target.width = target.clientWidth;
             target.height = target.clientHeight;
           } else {
@@ -86,6 +90,12 @@ module.directive('tartanRenderImage', [
         controller.on('tartan.changed', function(source, sett) {
           update(sett);
         });
+
+        $scope.$watch('options', function(newValue, oldValue) {
+          if (newValue !== oldValue) {
+            update(lastSett);
+          }
+        }, true);
 
         // Make it responsive
         $window.addEventListener('resize', function() {

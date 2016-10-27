@@ -5,11 +5,19 @@
   <title>Angular-Tartan Demo</title>
 
   <style>
+    [ng-cloak], .ng-cloak {
+      display: none !important;
+    }
+
     h1 {
       font-family: Hind,"Open Sans",sans-serif;
       margin: 0;
       padding: 0;
       font-size: 24px;
+    }
+
+    label {
+      margin-right: 20px;
     }
 
     .container {
@@ -59,31 +67,51 @@
   </style>
 </head>
 <body ng-app="Application" ng-controller="DemoController">
-<div class="section-wrapper">
-  <h1 id="version">Angular-Tartan {{ tartan.version }} demo</h1>
-</div>
-
-<div id="editor-container" class="section-wrapper container">
-  <textarea ng-model="source"></textarea>
-</div>
-
-<tartan source="{{ source }}">
-  <tartan-preset name="default"></tartan-preset>
-
-  <div id="canvas-container" class="section-wrapper container">
-    <tartan-render-image></tartan-render-image>
-  </div>
-
-  <div id="formatted-container" class="section-wrapper container">
-    <tartan-format></tartan-format>
-  </div>
-</tartan>
 
 <div class="section-wrapper">
-  <a href="https://github.com/kravets-levko/tartan/"
+  <h1 id="version">Angular-Tartan <span ng-cloak>{{ tartan.version }}</span> demo</h1>
+</div>
+
+<div class="section-wrapper" ng-hide="true">
+  Loading application...
+</div>
+
+<div ng-cloak>
+  <div id="editor-container" class="section-wrapper container">
+    <textarea ng-model="source"></textarea>
+  </div>
+
+  <div class="section-wrapper">
+    <label>
+      Schema:&nbsp;<select ng-model="schema"
+        ng-options="item.value as item.name for item in availableSchemas"></select>
+    </label>
+
+    <label>
+      Weave:&nbsp;<select ng-model="weave"
+        ng-options="item.value as item.name for item in availableWeaves"></select>
+    </label>
+  </div>
+
+  <tartan source="{{ source }}">
+    <tartan-schema name="{{ schema }}"></tartan-schema>
+
+    <div id="canvas-container" class="section-wrapper container">
+      <tartan-render-image options="{weave: weave, skipUnsupportedTokens: true, skipInvalidColors: true}"></tartan-render-image>
+    </div>
+
+    <div id="formatted-container" class="section-wrapper container">
+      <tartan-format></tartan-format>
+    </div>
+  </tartan>
+</div>
+
+<div class="section-wrapper">
+  <a href="https://github.com/kravets-levko/angular-tartan/"
     target="_blank">View repository on GitHub</a>
 </div>
 
+<script src="https://cdn.jsdelivr.net/lodash/4.16.4/lodash.min.js"></script>
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
 <script type="text/javascript" src="https://kravets-levko.github.io/tartan/dist/tartan.js"></script>
@@ -106,7 +134,24 @@
       '$scope',
       function($scope) {
         $scope.source = 'R#f00; R/40 Y1 R/40 [K8 Y4] Y5 R15 R5 T4 T6 [K8 W4] W/15 K4 Y/1';
-        $scope.test = '1111';
+
+        $scope.availableSchemas = _.map(tartan.schema,
+          function(value, key) {
+            return {
+              name: _.startCase(key),
+              value: key
+            };
+          });
+        $scope.schema = _.first($scope.availableSchemas).value;
+
+        $scope.availableWeaves = _.map(tartan.defaults.weave,
+          function(value, key) {
+            return {
+              name: _.startCase(key) + ' (' + value.join(' x ') + ')',
+              value: value
+            };
+          });
+        $scope.weave = tartan.defaults.weave.serge;
       }
     ])
   })();
