@@ -5,6 +5,7 @@ var tartan = require('tartan');
 var module = require('../../module');
 
 function makeDraggable(window, canvas, getOffset, repaint) {
+  var document = window.document;
   var drag = null;
   canvas.addEventListener('mousedown', function(event) {
     event = event || window.event;
@@ -74,6 +75,7 @@ module.directive('tartanRenderImage', [
           lastSett = sett;
           if (_.isObject(sett)) {
             var options = _.extend({}, $scope.options, {
+              defaultColors: controller.getColors(),
               transformSett: tartan.transform.flatten()
             });
             render = tartan.render.canvas(sett, options);

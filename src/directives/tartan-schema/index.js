@@ -16,19 +16,21 @@ module.directive('tartanSchema', [
         options: '=?'
       },
       link: function($scope, element, attr, controller) {
-        function update(preset) {
-          var parse = null;
-          var format = null;
-          if (_.isObject(preset)) {
-            parse = preset.parse($scope.options);
-            format = preset.format($scope.options);
+        function update(schema) {
+          if (_.isObject(schema)) {
+            schema = _.clone(schema);
+            schema.parse = schema.parse($scope.options);
+            schema.format = schema.format($scope.options);
+          } else {
+            schema = null;
           }
-          controller.setParser(parse);
-          controller.setFormatter(format);
+          controller.setSchema(schema);
         }
 
         $scope.$watch('name', function(newValue, oldValue) {
-          update(tartan.schema[$scope.name]);
+          if (newValue !== oldValue) {
+            update(tartan.schema[$scope.name]);
+          }
         });
         update(tartan.schema[$scope.name]);
       }

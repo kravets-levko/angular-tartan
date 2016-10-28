@@ -1,12 +1,9 @@
 'use strict';
 
 var _ = require('lodash');
+var tartan = require('tartan');
 var EventEmitter = require('events');
 var module = require('../../module');
-
-function stub() {
-  return null;
-}
 
 module.directive('tartan', [
   function() {
@@ -25,16 +22,15 @@ module.directive('tartan', [
           // Allow controller to have events
           _.extend(self, new EventEmitter());
 
-          var parser = stub;
-          var formatter = stub;
           var sett = null;
+          var schema = tartan.schema.default;
 
           function update() {
             sett = null;
-            if (parser && $scope.source) {
-              sett = parser($scope.source);
+            if (schema && $scope.source) {
+              sett = schema.parse($scope.source);
               self.emit('tartan.changed', $scope.source, sett,
-                formatter(sett));
+                schema.format(sett));
             }
           }
 
@@ -42,13 +38,12 @@ module.directive('tartan', [
             return sett;
           };
 
-          this.setParser = function(value) {
-            parser = _.isFunction(value) ? value : stub;
-            update();
+          this.getColors = function() {
+            return schema.colors;
           };
 
-          this.setFormatter = function(value) {
-            formatter = _.isFunction(value) ? value : stub;
+          this.setSchema = function(value) {
+            schema = _.isObject(value) ? value : tartan.schema.default;
             update();
           };
 

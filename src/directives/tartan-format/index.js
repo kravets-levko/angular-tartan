@@ -1,6 +1,5 @@
 'use strict';
 
-var tartan = require('tartan');
 var module = require('../../module');
 
 module.directive('tartanFormat', [

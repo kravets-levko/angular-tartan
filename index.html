@@ -138,7 +138,7 @@
         $scope.availableSchemas = _.map(tartan.schema,
           function(value, key) {
             return {
-              name: _.startCase(key),
+              name: value.name,
               value: key
             };
           });
