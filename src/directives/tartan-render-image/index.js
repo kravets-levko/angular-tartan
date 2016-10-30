@@ -85,6 +85,8 @@ module.directive('tartanRenderImage', [
           } else {
             render = tartan.render.canvas(); // Empty renderer
           }
+          target.width = target.clientWidth;
+          target.height = target.clientHeight;
           repaint();
         }
 
