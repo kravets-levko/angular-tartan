@@ -56,10 +56,11 @@ module.directive('tartanRenderImage', [
     return {
       restrict: 'E',
       require: '^^tartan',
-      template: '<canvas></canvas>',
+      template: '<canvas ng-class="{\'infinite-image\': !!repeat}"></canvas>',
       replace: false,
       scope: {
-        options: '=?'
+        options: '=?',
+        repeat: '=?'
       },
       link: function($scope, element, attr, controller) {
         var target = element.find('canvas').get(0);
@@ -68,7 +69,7 @@ module.directive('tartanRenderImage', [
         var lastSett = null;
 
         var repaint = tartan.helpers.repaint(function() {
-          offset = render(target, offset);
+          offset = render(target, offset, !!$scope.repeat);
         });
 
         function update(sett) {
@@ -94,6 +95,12 @@ module.directive('tartanRenderImage', [
         });
 
         $scope.$watch('options', function(newValue, oldValue) {
+          if (newValue !== oldValue) {
+            update(lastSett);
+          }
+        }, true);
+
+        $scope.$watch('repeat', function(newValue, oldValue) {
           if (newValue !== oldValue) {
             update(lastSett);
           }
