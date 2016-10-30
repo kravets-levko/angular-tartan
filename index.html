@@ -106,6 +106,7 @@
 
   <tartan source="{{ source }}">
     <tartan-schema name="{{ schema }}"></tartan-schema>
+    <tartan-metrics model="metrics"></tartan-metrics>
 
     <div id="canvas-container" class="section-wrapper container">
       <tartan-render-image repeat="inifinteImage"
@@ -157,6 +158,13 @@
             };
           });
         $scope.schema = 'classic';
+        $scope.metrics = null;
+
+        $scope.$watch('metrics', function(newValue, oldValue) {
+          if (newValue !== oldValue) {
+            console.log($scope.metrics);
+          }
+        });
 
         $scope.availableWeaves = _.map(tartan.defaults.weave,
           function(value, key) {
