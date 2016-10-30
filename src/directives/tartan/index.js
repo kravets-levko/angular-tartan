@@ -42,6 +42,10 @@ module.directive('tartan', [
             return schema.colors;
           };
 
+          this.getSchema = function() {
+            return schema;
+          };
+
           this.setSchema = function(value) {
             schema = _.isObject(value) ? value : tartan.schema.default;
             update();

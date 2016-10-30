@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('lodash');
 var module = require('../../module');
 
 module.directive('tartanFormat', [
@@ -15,6 +16,12 @@ module.directive('tartanFormat', [
         controller.on('tartan.changed', function(source, sett, formatted) {
           target.text(formatted);
         });
+
+        var sett = controller.getSett();
+        var schema = controller.getSchema();
+        if (_.isObject(sett) && _.isObject(schema)) {
+          target.text(schema.format(sett));
+        }
       }
     };
   }

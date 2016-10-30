@@ -12,16 +12,24 @@ module.directive('tartanMetrics', [
       template: '',
       replace: false,
       scope: {
+        options: '=?',
         model: '='
       },
       link: function($scope, element, attr, controller) {
-        var calculator = tartan.render.metrics({
-          skipUnsupportedTokens: true,
-          skipInvalidColors: true,
-          transformSett: tartan.transform.flatten()
-        });
+        function createCalculator() {
+          return tartan.render.metrics(_.extend({
+            skipUnsupportedTokens: true,
+            skipInvalidColors: true
+          }, $scope.options, {
+            transformSett: tartan.transform.flatten()
+          }));
+        }
+
+        var calculator = createCalculator();
+        var lastSett = null;
 
         function update(sett) {
+          lastSett = sett;
           if (_.isObject(sett)) {
             $scope.model = calculator(sett);
           } else {
@@ -30,6 +38,13 @@ module.directive('tartanMetrics', [
         }
 
         update(controller.getSett());
+
+        $scope.$watch('options', function(newValue, oldValue) {
+          if (newValue !== oldValue) {
+            calculator = createCalculator();
+            update(lastSett);
+          }
+        }, true);
 
         controller.on('tartan.changed', function(source, sett) {
           update(sett);
