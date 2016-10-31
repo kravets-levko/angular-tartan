@@ -102,6 +102,10 @@
       Repeat image infinitely
     </label>
   </div>
+  <div style="margin-bottom: 10px;">
+    <label>Rendering offset: {{ renderingOffset | json }}</label>
+    <button type="button" ng-click="updateRenderingOffset(0, 0)">Reset offset</button>
+  </div>
   </div>
 
   <tartan source="{{ source }}">
@@ -109,7 +113,7 @@
     <tartan-metrics model="metrics" options="{weave: weave}"></tartan-metrics>
 
     <div id="canvas-container" class="section-wrapper container">
-      <tartan-render-image repeat="inifinteImage"
+      <tartan-render-image repeat="inifinteImage" offset="renderingOffset"
         options="{weave: weave, skipUnsupportedTokens: true, skipInvalidColors: true}"></tartan-render-image>
     </div>
 
@@ -159,6 +163,11 @@
           });
         $scope.schema = 'classic';
         $scope.metrics = null;
+        $scope.renderingOffset = {};
+
+        $scope.updateRenderingOffset = function(x, y) {
+          $scope.renderingOffset = {x: x, y: y};
+        };
 
         $scope.$watch('metrics', function(newValue, oldValue) {
           if (newValue !== oldValue) {

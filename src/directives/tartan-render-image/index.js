@@ -9,7 +9,7 @@ function makeDraggable(window, canvas, getOffset, repaint) {
   var drag = null;
   canvas.addEventListener('mousedown', function(event) {
     event = event || window.event;
-    if (event.button == 0) {
+    if (event.buttons == 1) {
       drag = {
         x: event.offsetX,
         y: event.offsetY
@@ -23,19 +23,27 @@ function makeDraggable(window, canvas, getOffset, repaint) {
   canvas.addEventListener('mousemove', function(event) {
     event = event || window.event;
     if (drag) {
-      var offset = getOffset();
-      offset.x += event.offsetX - drag.x;
-      offset.y += event.offsetY - drag.y;
+      if (event.buttons != 1) {
+        drag = null;
+        if (document.releaseCapture) {
+          // Only IE and FF
+          document.releaseCapture();
+        }
+      } else {
+        var offset = getOffset();
+        offset.x += event.offsetX - drag.x;
+        offset.y += event.offsetY - drag.y;
 
-      drag.x = event.offsetX;
-      drag.y = event.offsetY;
+        drag.x = event.offsetX;
+        drag.y = event.offsetY;
+      }
 
       repaint();
     }
   });
   canvas.addEventListener('mouseup', function(event) {
     event = event || window.event;
-    if (event.button == 0) {
+    if (event.buttons == 1) {
       drag = null;
       if (document.releaseCapture) {
         // Only IE and FF
@@ -51,8 +59,8 @@ function makeDraggable(window, canvas, getOffset, repaint) {
 }
 
 module.directive('tartanRenderImage', [
-  '$window',
-  function($window) {
+  '$window', '$timeout',
+  function($window, $timeout) {
     return {
       restrict: 'E',
       require: '^^tartan',
@@ -60,16 +68,32 @@ module.directive('tartanRenderImage', [
       replace: false,
       scope: {
         options: '=?',
-        repeat: '=?'
+        repeat: '=?',
+        offset: '=?'
       },
       link: function($scope, element, attr, controller) {
         var target = element.find('canvas').get(0);
         var render = null;
-        var offset = {x: 0, y: 0};
         var lastSett = null;
+        var offset = {x: 0, y: 0};
+
+        function updateOffset() {
+          $scope.offset = _.clone(offset);
+        }
+
+        $scope.$watch('offset', function(newValue, oldValue) {
+          if (newValue !== oldValue) {
+            var temp = _.extend({}, offset, newValue);
+            if ((temp.x != offset.x) || (temp.y != offset.y)) {
+              offset = temp;
+              repaint();
+            }
+          }
+        }, true);
 
         var repaint = tartan.helpers.repaint(function() {
           offset = render(target, offset, !!$scope.repeat);
+          $timeout(updateOffset);
         });
 
         function update(sett) {
