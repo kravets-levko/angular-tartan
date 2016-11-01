@@ -64,7 +64,10 @@ module.directive('tartanRenderImage', [
     return {
       restrict: 'E',
       require: '^^tartan',
-      template: '<canvas ng-class="{\'infinite-image\': !!repeat}"></canvas>',
+      template:
+        '<div class="tartan-render-image" style="position:relative;">' +
+        '<canvas ng-class="{\'infinite-image\': !!repeat}"></canvas>' +
+        '</div>',
       replace: false,
       scope: {
         options: '=?',
@@ -72,7 +75,9 @@ module.directive('tartanRenderImage', [
         offset: '=?'
       },
       link: function($scope, element, attr, controller) {
-        var target = element.find('canvas').get(0);
+        var target = element.find('canvas');
+        var canvas = target.get(0);
+        var parent = target.parent().get(0);
         var render = null;
         var lastSett = null;
         var offset = {x: 0, y: 0};
@@ -92,7 +97,7 @@ module.directive('tartanRenderImage', [
         }, true);
 
         var repaint = tartan.helpers.repaint(function() {
-          offset = render(target, offset, !!$scope.repeat);
+          offset = render(canvas, offset, !!$scope.repeat);
           $timeout(updateOffset);
         });
 
@@ -104,14 +109,10 @@ module.directive('tartanRenderImage', [
               transformSett: tartan.transform.flatten()
             });
             render = tartan.render.canvas(sett, options);
-            target.width = target.clientWidth;
-            target.height = target.clientHeight;
           } else {
             render = tartan.render.canvas(); // Empty renderer
           }
-          target.width = target.clientWidth;
-          target.height = target.clientHeight;
-          repaint();
+          updateCanvasSize();
         }
 
         update(controller.getSett());
@@ -133,14 +134,31 @@ module.directive('tartanRenderImage', [
         }, true);
 
         // Make it responsive
-        $window.addEventListener('resize', function() {
-          target.width = target.clientWidth;
-          target.height = target.clientHeight;
+        function updateCanvasSize() {
+          var w = Math.ceil(parent.offsetWidth);
+          var h = Math.ceil(parent.offsetHeight);
+          target.css({
+            position: 'absolute',
+            left: '0px',
+            top: '0px',
+            width: w + 'px',
+            height: h + 'px'
+          });
+          if (canvas.width != w) {
+            canvas.width = w;
+          }
+          if (canvas.height != h) {
+            canvas.height = h;
+          }
           repaint();
+        }
+        $window.addEventListener('resize', updateCanvasSize);
+        $scope.$on('$destroy', function() {
+          $window.removeEventListener('resize', updateCanvasSize);
         });
 
         // Make it draggable
-        makeDraggable($window, target, function() {
+        makeDraggable($window, canvas, function() {
           return offset;
         }, repaint);
       }
