@@ -7,6 +7,7 @@ var module = require('../../module');
 function makeDraggable(window, canvas, getOffset, repaint) {
   var document = window.document;
   var drag = null;
+  var dragTarget = document.releaseCapture ? canvas : window;
   canvas.addEventListener('mousedown', function(event) {
     event = event || window.event;
     if (event.buttons == 1) {
@@ -20,7 +21,7 @@ function makeDraggable(window, canvas, getOffset, repaint) {
       }
     }
   });
-  canvas.addEventListener('mousemove', function(event) {
+  dragTarget.addEventListener('mousemove', function(event) {
     event = event || window.event;
     if (drag) {
       if (event.buttons != 1) {
@@ -36,12 +37,14 @@ function makeDraggable(window, canvas, getOffset, repaint) {
 
         drag.x = event.offsetX;
         drag.y = event.offsetY;
+
+        event.preventDefault();
       }
 
       repaint();
     }
   });
-  canvas.addEventListener('mouseup', function(event) {
+  dragTarget.addEventListener('mouseup', function(event) {
     event = event || window.event;
     if (event.buttons == 1) {
       drag = null;
@@ -72,7 +75,8 @@ module.directive('tartanRenderImage', [
       scope: {
         options: '=?',
         repeat: '=?',
-        offset: '=?'
+        offset: '=?',
+        interactive: '=?'
       },
       link: function($scope, element, attr, controller) {
         var target = element.find('canvas');
@@ -97,6 +101,9 @@ module.directive('tartanRenderImage', [
         }, true);
 
         var repaint = tartan.helpers.repaint(function() {
+          if (!$scope.interactive) {
+            offset = {x: 0, y: 0};
+          }
           offset = render(canvas, offset, !!$scope.repeat);
           $timeout(updateOffset);
         });
@@ -131,7 +138,13 @@ module.directive('tartanRenderImage', [
           if (newValue !== oldValue) {
             update(lastSett);
           }
-        }, true);
+        });
+
+        $scope.$watch('interactive', function(newValue, oldValue) {
+          if (newValue !== oldValue) {
+            repaint();
+          }
+        });
 
         // Make it responsive
         function updateCanvasSize() {
@@ -159,7 +172,7 @@ module.directive('tartanRenderImage', [
 
         // Make it draggable
         makeDraggable($window, canvas, function() {
-          return offset;
+          return !!$scope.interactive ? offset : {x: 0, y: 0};
         }, repaint);
       }
     };
