@@ -94,16 +94,6 @@ module.directive('tartanRenderImage', [
           $scope.offset = _.clone(offset);
         }
 
-        $scope.$watch('offset', function(newValue, oldValue) {
-          if (newValue !== oldValue) {
-            var temp = _.extend({}, offset, newValue);
-            if ((temp.x != offset.x) || (temp.y != offset.y)) {
-              offset = temp;
-              repaint();
-            }
-          }
-        }, true);
-
         var repaint = tartan.helpers.repaint(function() {
           if (!$scope.interactive) {
             offset = {x: 0, y: 0};
@@ -143,6 +133,16 @@ module.directive('tartanRenderImage', [
             update(lastSett);
           }
         });
+
+        $scope.$watch('offset', function(newValue, oldValue) {
+          if (newValue !== oldValue) {
+            var temp = _.extend({}, offset, newValue);
+            if ((temp.x != offset.x) || (temp.y != offset.y)) {
+              offset = temp;
+              repaint();
+            }
+          }
+        }, true);
 
         $scope.$watch('interactive', function(newValue, oldValue) {
           if (newValue !== oldValue) {
