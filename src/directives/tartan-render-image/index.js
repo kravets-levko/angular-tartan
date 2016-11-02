@@ -8,12 +8,16 @@ function makeDraggable(window, canvas, getOffset, repaint) {
   var document = window.document;
   var drag = null;
   var dragTarget = document.releaseCapture ? canvas : window;
-  canvas.addEventListener('mousedown', function(event) {
+  dragTarget.addEventListener('mousedown', function(event) {
     event = event || window.event;
+    if (event.target !== canvas) {
+      return;
+    }
     if (event.buttons == 1) {
+      event.preventDefault();
       drag = {
-        x: event.offsetX,
-        y: event.offsetY
+        x: event.clientX,
+        y: event.clientY
       };
       if (event.target && event.target.setCapture) {
         // Only IE and FF
@@ -32,11 +36,11 @@ function makeDraggable(window, canvas, getOffset, repaint) {
         }
       } else {
         var offset = getOffset();
-        offset.x += event.offsetX - drag.x;
-        offset.y += event.offsetY - drag.y;
+        offset.x += event.clientX - drag.x;
+        offset.y += event.clientY - drag.y;
 
-        drag.x = event.offsetX;
-        drag.y = event.offsetY;
+        drag.x = event.clientX;
+        drag.y = event.clientY;
 
         event.preventDefault();
       }
