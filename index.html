@@ -105,19 +105,19 @@
     </label>
   </div>
   <div style="margin-bottom: 10px;">
-    <label>Rendering offset: {{ renderingOffset | json }}</label>
+    <label>Rendering offset: ({{ renderingOffset.x }}; {{ renderingOffset.y }})</label>
     <button type="button" ng-click="updateRenderingOffset(0, 0)">Reset offset</button>
   </div>
   </div>
 
   <tartan source="{{ source }}">
+    <tartan-error-handler-collect model="errors"></tartan-error-handler-collect>
     <tartan-schema name="{{ schema }}"></tartan-schema>
-    <tartan-metrics model="metrics" options="{weave: weave}"></tartan-metrics>
 
     <div id="canvas-container" class="section-wrapper container">
       <tartan-render-image repeat="inifinteImage" offset="renderingOffset"
-        interactive="true"
-        options="{weave: weave, skipUnsupportedTokens: true, skipInvalidColors: true}"></tartan-render-image>
+        interactive="true" metrics="metrics"
+        options="{weave: weave}"></tartan-render-image>
     </div>
 
     <div id="formatted-container" class="section-wrapper container">
@@ -127,14 +127,14 @@
 </div>
 
 <div class="section-wrapper">
-  <a href="https://github.com/kravets-levko/angular-tartan/"
+  <a href="https://github.com/thetartan/angular-tartan/"
     target="_blank">View repository on GitHub</a>
 </div>
 
 <script src="https://cdn.jsdelivr.net/lodash/4.16.4/lodash.min.js"></script>
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
-<script type="text/javascript" src="https://kravets-levko.github.io/tartan/dist/tartan.js"></script>
+<script type="text/javascript" src="https://thetartan.github.io/tartan/dist/tartan.js"></script>
 <script type="text/javascript" src="dist/angular-tartan.js"></script>
 
 <script type="text/javascript">
@@ -157,6 +157,11 @@
           'B/24 K4 B4 K4 B4 K20 G24 K6 G24 K20 B22 K4 B/4';
         $scope.inifinteImage = true;
 
+        $scope.errors = [];
+        $scope.$watchCollection('errors', function() {
+          console.log($scope.errors);
+        });
+
         $scope.availableSchemas = _.map(tartan.schema,
           function(value, key) {
             return {
@@ -164,7 +169,7 @@
               value: key
             };
           });
-        $scope.schema = 'classic';
+        $scope.schema = 'extended';
         $scope.metrics = null;
         $scope.renderingOffset = {};
 

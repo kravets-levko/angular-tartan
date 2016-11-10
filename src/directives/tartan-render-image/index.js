@@ -80,6 +80,7 @@ module.directive('tartanRenderImage', [
         options: '=?',
         repeat: '=?',
         offset: '=?',
+        metrics: '=?',
         interactive: '=?'
       },
       link: function($scope, element, attr, controller) {
@@ -94,7 +95,7 @@ module.directive('tartanRenderImage', [
           $scope.offset = _.clone(offset);
         }
 
-        var repaint = tartan.helpers.repaint(function() {
+        var repaint = tartan.utils.repaint(function() {
           if (!$scope.interactive) {
             offset = {x: 0, y: 0};
           }
@@ -107,12 +108,13 @@ module.directive('tartanRenderImage', [
           if (_.isObject(sett)) {
             var options = _.extend({}, $scope.options, {
               defaultColors: controller.getColors(),
-              transformSett: tartan.transform.flatten()
+              transformSyntaxTree: tartan.transform.flatten()
             });
             render = tartan.render.canvas(sett, options);
           } else {
             render = tartan.render.canvas(); // Empty renderer
           }
+          $scope.metrics = render.metrics;
           updateCanvasSize();
         }
 
@@ -120,6 +122,7 @@ module.directive('tartanRenderImage', [
 
         controller.on('tartan.changed', function(source, sett) {
           update(sett);
+          $scope.$applyAsync();
         });
 
         $scope.$watch('options', function(newValue, oldValue) {

@@ -1,6 +1,6 @@
 {
   "name": "angular-tartan",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "Angular bindings for tartan library.",
   "keywords": [
     "angular",
@@ -28,18 +28,16 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kravets-levko/angular-tartan/issues"
+    "url": "https://github.com/thetartan/angular-tartan/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kravets-levko/angular-tartan.git"
+    "url": "https://github.com/thetartan/angular-tartan.git"
   },
   "dependencies": {
     "angular": "^1.5.8",
-    "lodash": "^4.16.4"
-  },
-  "peerDependencies": {
-    "tartan": "^3.0.0"
+    "lodash": "^4.16.4",
+    "tartan": "^4.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",

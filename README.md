@@ -1,7 +1,7 @@
-# Tartan
+# Angular-Tartan
 
 This is Angular bindings for 
-[tartan](https://github.com/kravets-levko/tartan) library.
+[tartan](https://github.com/thetartan/tartan) library.
 This library is distributed under the [MIT license](LICENSE).
 
-Demo is available on [GitHub Pages](https://kravets-levko.github.io/angular-tartan/)
+Demo is available on [GitHub Pages](https://thetartan.github.io/angular-tartan/)
