@@ -170,12 +170,29 @@
     app.controller('DemoController', [
       '$scope', '$location',
       function($scope, $location) {
-        console.log($location.search());
         $scope.source = _.trim($location.search().sett || '');
         if ($scope.source == '') {
           $scope.source = 'K#101010 BLACK; B#2c2c80 BLUE; G#006818 GREEN;\n' +
             'B/24 K4 B4 K4 B4 K20 G24 K6 G24 K20 B22 K4 B/4';
         }
+
+        var updateUrl = _.debounce(function() {
+          if ($scope.source != '') {
+            $location.search('sett', $scope.source);
+          } else {
+            $location.search('sett', null);
+          }
+          $scope.$applyAsync();
+        }, 500);
+        updateUrl();
+        updateUrl.flush();
+
+        $scope.$watch('source', function(newValue, oldValue) {
+          if (newValue !== oldValue) {
+            updateUrl();
+          }
+        });
+
         $scope.inifinteImage = true;
         $scope.draggableImage = true;
 

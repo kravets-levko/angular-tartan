@@ -29,7 +29,7 @@ module.directive('tartan', [
           function update() {
             sett = null;
             self.emit('tartan.beginUpdate');
-            if (schema && $scope.source) {
+            if (schema) {
               sett = schema.parse($scope.source);
               self.emit('tartan.changed', $scope.source, sett,
                 schema.format(sett));
