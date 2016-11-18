@@ -8,7 +8,8 @@ function makeDraggable(window, canvas, getOffset, repaint) {
   var document = window.document;
   var drag = null;
   var dragTarget = document.releaseCapture ? canvas : window;
-  dragTarget.addEventListener('mousedown', function(event) {
+
+  function onMouseDown(event) {
     event = event || window.event;
     if (event.target !== canvas) {
       return;
@@ -24,8 +25,8 @@ function makeDraggable(window, canvas, getOffset, repaint) {
         event.target.setCapture();
       }
     }
-  });
-  dragTarget.addEventListener('mousemove', function(event) {
+  }
+  function onMouseMove(event) {
     event = event || window.event;
     if (drag) {
       if (event.buttons != 1) {
@@ -47,8 +48,8 @@ function makeDraggable(window, canvas, getOffset, repaint) {
 
       repaint();
     }
-  });
-  dragTarget.addEventListener('mouseup', function(event) {
+  }
+  function onMouseUp(event) {
     event = event || window.event;
     if (event.buttons == 1) {
       drag = null;
@@ -58,11 +59,36 @@ function makeDraggable(window, canvas, getOffset, repaint) {
       }
     }
     repaint();
-  });
-  canvas.addEventListener('losecapture', function() {
+  }
+  function onLoseCapture() {
     // Only IE and FF
     drag = null;
-  });
+  }
+
+  dragTarget.addEventListener('mousedown', onMouseDown);
+  dragTarget.addEventListener('mousemove', onMouseMove);
+  dragTarget.addEventListener('mouseup', onMouseUp);
+  canvas.addEventListener('losecapture', onLoseCapture);
+
+  return function() {
+    dragTarget.removeEventListener('mousedown', onMouseDown);
+    dragTarget.removeEventListener('mousemove', onMouseMove);
+    dragTarget.removeEventListener('mouseup', onMouseUp);
+    canvas.removeEventListener('losecapture', onLoseCapture);
+  };
+}
+
+function makeResizable(window, update) {
+  function onResize() {
+    if (_.isFunction(update)) {
+      update();
+    }
+  }
+
+  window.addEventListener('resize', onResize);
+  return function() {
+    window.removeEventListener('mousedown', onResize);
+  };
 }
 
 module.directive('tartanRenderImage', [
@@ -72,8 +98,8 @@ module.directive('tartanRenderImage', [
       restrict: 'E',
       require: '^^tartan',
       template:
-        '<div class="tartan-render-image" style="position:relative;">' +
-        '<canvas ng-class="{\'infinite-image\': !!repeat}"></canvas>' +
+        '<div class="tartan-render-image" style="position: relative;">' +
+          '<canvas></canvas>' +
         '</div>',
       replace: false,
       scope: {
@@ -90,6 +116,11 @@ module.directive('tartanRenderImage', [
         var render = null;
         var lastSett = null;
         var offset = {x: 0, y: 0};
+
+        $scope.interactiveOptions = {
+          resize: false,
+          drag: false
+        };
 
         function updateOffset() {
           $scope.offset = _.clone(offset);
@@ -147,13 +178,54 @@ module.directive('tartanRenderImage', [
           }
         }, true);
 
-        $scope.$watch('interactive', function(newValue, oldValue) {
-          if (newValue !== oldValue) {
-            repaint();
+        var disableResize = null;
+        var disableDrag = null;
+
+        $scope.$watch('interactive', function() {
+          var interactive = _.extend({
+            resize: false,
+            drag: false
+          }, $scope.interactive === true ? {
+            resize: true,
+            drag: true
+          } : $scope.interactive);
+          $scope.interactiveOptions = interactive;
+
+          var disable = [];
+          if (interactive.resize) {
+            if (!disableResize) {
+              disableResize = makeResizable($window, updateCanvasSize);
+            }
+          } else {
+            if (disableResize) {
+              // Disable it later, but NULL it now
+              disable.push(disableResize);
+              disableResize = null;
+            }
           }
+
+          if (interactive.drag) {
+            if (!disableDrag) {
+              disableDrag = makeDraggable($window, canvas, function() {
+                return offset;
+              }, repaint);
+            }
+          } else {
+            if (disableDrag) {
+              // Disable it later, but NULL it now
+              disable.push(disableDrag);
+              disableDrag = null;
+            }
+          }
+          repaint();
+
+          // Safely run each callback - even if one of them will
+          // crash - it doesn't matter at the moment
+          _.each(disable, function(disable) {
+            disable();
+          });
         });
 
-        // Make it responsive
         function updateCanvasSize() {
           var w = Math.ceil(parent.offsetWidth);
           var h = Math.ceil(parent.offsetHeight);
@@ -172,15 +244,15 @@ module.directive('tartanRenderImage', [
           }
           repaint();
         }
-        $window.addEventListener('resize', updateCanvasSize);
-        $scope.$on('$destroy', function() {
-          $window.removeEventListener('resize', updateCanvasSize);
-        });
 
-        // Make it draggable
-        makeDraggable($window, canvas, function() {
-          return !!$scope.interactive ? offset : {x: 0, y: 0};
-        }, repaint);
+        $scope.$on('$destroy', function() {
+          if (disableDrag) {
+            disableDrag();
+          }
+          if (disableResize) {
+            disableResize();
+          }
+        });
       }
     };
   }

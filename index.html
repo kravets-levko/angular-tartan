@@ -56,7 +56,7 @@
       -ms-interpolation-mode: nearest-neighbor;
     }
 
-    #canvas-container canvas.infinite-image {
+    #canvas-container.infinite-image canvas {
       cursor: move;
     }
 
@@ -103,6 +103,11 @@
       <input type="checkbox" ng-model="inifinteImage">
       Repeat image infinitely
     </label>
+
+    <label>
+      <input type="checkbox" ng-model="draggableImage">
+      Drag image
+    </label>
   </div>
   <div style="margin-bottom: 10px;">
     <label>Rendering offset: ({{ renderingOffset.x }}; {{ renderingOffset.y }})</label>
@@ -114,9 +119,10 @@
     <tartan-error-handler-collect model="errors"></tartan-error-handler-collect>
     <tartan-schema name="{{ schema }}"></tartan-schema>
 
-    <div id="canvas-container" class="section-wrapper container">
+    <div id="canvas-container" class="section-wrapper container"
+      ng-class="{'infinite-image': inifinteImage && draggableImage}">
       <tartan-render-image repeat="inifinteImage" offset="renderingOffset"
-        interactive="true" metrics="metrics"
+        interactive="{resize: true, drag: draggableImage}" metrics="metrics"
         options="{weave: weave}"></tartan-render-image>
     </div>
 
@@ -151,11 +157,16 @@
     ]);
 
     app.controller('DemoController', [
-      '$scope',
-      function($scope) {
-        $scope.source = 'K#101010 BLACK; B#2c2c80 BLUE; G#006818 GREEN;\n' +
-          'B/24 K4 B4 K4 B4 K20 G24 K6 G24 K20 B22 K4 B/4';
+      '$scope', '$location',
+      function($scope, $location) {
+        console.log($location.search());
+        $scope.source = _.trim($location.search().sett || '');
+        if ($scope.source == '') {
+          $scope.source = 'K#101010 BLACK; B#2c2c80 BLUE; G#006818 GREEN;\n' +
+            'B/24 K4 B4 K4 B4 K20 G24 K6 G24 K20 B22 K4 B/4';
+        }
         $scope.inifinteImage = true;
+        $scope.draggableImage = true;
 
         $scope.errors = [];
         $scope.$watchCollection('errors', function() {
