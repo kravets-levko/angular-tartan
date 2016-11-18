@@ -149,6 +149,17 @@
       'angular-tartan'
     ]);
 
+    app.config([
+      '$locationProvider',
+      function ($locationProvider) {
+        $locationProvider.html5Mode({
+          enabled: true,
+          requireBase: false,
+          rewriteLinks: false
+        })
+      }
+    ]);
+
     app.run([
       '$rootScope',
       function($rootScope) {
