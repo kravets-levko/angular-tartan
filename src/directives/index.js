@@ -2,7 +2,8 @@
 
 require('./tartan');
 require('./tartan-schema');
-require('./tartan-render-image');
+require('./tartan-image');
+require('./tartan-preview-control');
 require('./tartan-format');
 require('./tartan-error-handler-console');
 require('./tartan-error-handler-throw');

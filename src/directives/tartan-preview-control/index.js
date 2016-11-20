@@ -91,25 +91,29 @@ function makeResizable(window, update) {
   };
 }
 
-module.directive('tartanRenderImage', [
+module.directive('tartanPreviewControl', [
   '$window', '$timeout',
   function($window, $timeout) {
     return {
       restrict: 'E',
       require: '^^tartan',
       template:
-        '<div class="tartan-render-image" style="position: relative;">' +
+        '<div class="tartan-preview-control">' +
           '<canvas></canvas>' +
         '</div>',
       replace: false,
       scope: {
-        options: '=?',
+        weave: '=?',
         repeat: '=?',
         offset: '=?',
         metrics: '=?',
         interactive: '=?'
       },
       link: function($scope, element, attr, controller) {
+        element.css({
+          'position': 'relative'
+        });
+
         var target = element.find('canvas');
         var canvas = target.get(0);
         var parent = target.parent().get(0);
@@ -137,10 +141,11 @@ module.directive('tartanRenderImage', [
         function update(sett) {
           lastSett = sett;
           if (_.isObject(sett)) {
-            var options = _.extend({}, $scope.options, {
+            var options = {
+              weave: $scope.weave,
               defaultColors: controller.getColors(),
               transformSyntaxTree: tartan.transform.flatten()
-            });
+            };
             render = tartan.render.canvas(sett, options);
           } else {
             render = tartan.render.canvas(); // Empty renderer
@@ -156,7 +161,7 @@ module.directive('tartanRenderImage', [
           $scope.$applyAsync();
         });
 
-        $scope.$watch('options', function(newValue, oldValue) {
+        $scope.$watch('weave', function(newValue, oldValue) {
           if (newValue !== oldValue) {
             update(lastSett);
           }
