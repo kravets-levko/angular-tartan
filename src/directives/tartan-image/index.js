@@ -2,11 +2,11 @@
 
 var _ = require('lodash');
 var tartan = require('tartan');
-var module = require('../../module');
+var ngTartan = require('../../module');
 
 var parseSourcePattern = /^([\s\S]*?)\/([\s\S]*?)\/([\s\S]*)$/;
 
-module.directive('tartanImage', [
+ngTartan.directive('tartanImage', [
   function() {
     return {
       restrict: 'E',

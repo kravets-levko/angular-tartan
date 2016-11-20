@@ -2,9 +2,9 @@
 
 var _ = require('lodash');
 var tartan = require('tartan');
-var module = require('../../module');
+var ngTartan = require('../../module');
 
-module.directive('tartanPreviewImage', [
+ngTartan.directive('tartanPreviewImage', [
   function() {
     return {
       restrict: 'E',
@@ -18,38 +18,37 @@ module.directive('tartanPreviewImage', [
       link: function($scope, element, attr, controller) {
         var canvas = element.find('canvas').get(0);
         var render = null;
-        var lastSett = null;
+        var currentState = null;
 
         var repaint = tartan.utils.repaint(function() {
           render(canvas, {x: 0, y: 0}, true);
         });
 
-        function update(sett) {
-          lastSett = sett;
-          if (_.isObject(sett)) {
-            var options = {
-              weave: $scope.weave,
-              defaultColors: controller.getColors(),
-              transformSyntaxTree: tartan.transform.flatten()
-            };
-            render = tartan.render.canvas(sett, options);
-          } else {
-            render = tartan.render.canvas(); // Empty renderer
-          }
+        function update() {
+          var options = {
+            weave: $scope.weave,
+            defaultColors: currentState.colors,
+            transformSyntaxTree: tartan.transform.flatten()
+          };
+          render = tartan.render.canvas(currentState.sett, options);
           $scope.metrics = render.metrics;
           updateCanvasSize();
         }
 
-        update(controller.getSett());
+        controller.requestUpdate(function(state) {
+          currentState = state;
+          update();
+        });
 
-        controller.on('tartan.changed', function(source, sett) {
-          update(sett);
+        controller.on('tartan.changed', function(state) {
+          currentState = state;
+          update();
           $scope.$applyAsync();
         });
 
         $scope.$watch('weave', function(newValue, oldValue) {
           if (newValue !== oldValue) {
-            update(lastSett);
+            update();
           }
         }, true);
 

@@ -2,7 +2,7 @@
 
 var _ = require('lodash');
 var tartan = require('tartan');
-var module = require('../../module');
+var ngTartan = require('../../module');
 
 function makeDraggable(window, canvas, getOffset, repaint) {
   var document = window.document;
@@ -91,7 +91,7 @@ function makeResizable(window, update) {
   };
 }
 
-module.directive('tartanPreviewControl', [
+ngTartan.directive('tartanPreviewControl', [
   '$window', '$timeout',
   function($window, $timeout) {
     return {
@@ -118,7 +118,7 @@ module.directive('tartanPreviewControl', [
         var canvas = target.get(0);
         var parent = target.parent().get(0);
         var render = null;
-        var lastSett = null;
+        var currentState = null;
         var offset = {x: 0, y: 0};
 
         $scope.interactiveOptions = {
@@ -138,38 +138,37 @@ module.directive('tartanPreviewControl', [
           $timeout(updateOffset);
         });
 
-        function update(sett) {
-          lastSett = sett;
-          if (_.isObject(sett)) {
-            var options = {
-              weave: $scope.weave,
-              defaultColors: controller.getColors(),
-              transformSyntaxTree: tartan.transform.flatten()
-            };
-            render = tartan.render.canvas(sett, options);
-          } else {
-            render = tartan.render.canvas(); // Empty renderer
-          }
+        function update() {
+          var options = {
+            weave: $scope.weave,
+            defaultColors: currentState.colors,
+            transformSyntaxTree: tartan.transform.flatten()
+          };
+          render = tartan.render.canvas(currentState.sett, options);
           $scope.metrics = render.metrics;
           updateCanvasSize();
         }
 
-        update(controller.getSett());
+        controller.requestUpdate(function(state) {
+          currentState = state;
+          update();
+        });
 
-        controller.on('tartan.changed', function(source, sett) {
-          update(sett);
+        controller.on('tartan.changed', function(state) {
+          currentState = state;
+          update();
           $scope.$applyAsync();
         });
 
         $scope.$watch('weave', function(newValue, oldValue) {
           if (newValue !== oldValue) {
-            update(lastSett);
+            update();
           }
         }, true);
 
         $scope.$watch('repeat', function(newValue, oldValue) {
           if (newValue !== oldValue) {
-            update(lastSett);
+            update();
           }
         });
 

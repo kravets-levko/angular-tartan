@@ -1,8 +1,8 @@
 'use strict';
 
-var module = require('../../module');
+var ngTartan = require('../../module');
 
-module.directive('tartanErrorHandlerCustom', [
+ngTartan.directive('tartanErrorHandlerCustom', [
   function() {
     return {
       restrict: 'E',

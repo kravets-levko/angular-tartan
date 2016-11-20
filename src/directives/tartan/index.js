@@ -3,69 +3,99 @@
 var _ = require('lodash');
 var tartan = require('tartan');
 var EventEmitter = require('events');
-var module = require('../../module');
+var ngTartan = require('../../module');
 
-module.directive('tartan', [
+ngTartan.directive('tartan', [
   function() {
     return {
       restrict: 'E',
       template: '',
       replace: false,
       scope: {
-        source: '@'
+        source: '@?',
+        schema: '@?',
+        options: '=?'
       },
       controller: [
         '$scope',
         function($scope) {
           var self = this;
 
-          // Allow controller to have events
+          // Allow controller to emit events
           _.extend(self, new EventEmitter());
 
-          var sett = null;
           var errorHandler = null;
-          var schema = tartan.schema.default;
+          var parse = null;
+          var format = null;
 
-          function update() {
-            sett = null;
+          var state = {
+            schema: null,
+            source: null,
+            sett: null,
+            formatted: null,
+            colors: null
+          };
+
+          function updateSchema() {
+            var schema = tartan.schema[$scope.schema] || tartan.schema.classic;
+            parse = schema.parse(_.extend({}, $scope.options, {
+              errorHandler: errorHandler
+            }));
+            format = schema.format(_.extend({}, $scope.options));
+
+            state = {
+              schema: schema,
+              source: null,
+              sett: null,
+              formatted: null,
+              colors: schema.colors
+            };
+
+            updateSource();
+          }
+
+          function updateSource() {
             self.emit('tartan.beginUpdate');
-            if (schema) {
-              sett = schema.parse($scope.source);
-              self.emit('tartan.changed', $scope.source, sett,
-                schema.format(sett));
-            }
+
+            var sett = parse($scope.source);
+            state = _.extend({}, state, {
+              source: $scope.source,
+              sett: sett,
+              formatted: format(sett)
+            });
+
+            self.emit('tartan.changed', state);
             self.emit('tartan.endUpdate');
           }
 
-          this.getSett = function() {
-            return sett;
-          };
-
-          this.getColors = function() {
-            return schema.colors;
-          };
-
-          this.getSchema = function() {
-            return schema;
-          };
-
-          this.getErrorHandler = function() {
-            return errorHandler;
+          this.requestUpdate = function(callback) {
+            if (_.isFunction(callback)) {
+              callback(state);
+            }
           };
 
           this.setErrorHandler = function(value) {
             errorHandler = value;
-            self.emit('tartan.updateSchema');
+            updateSchema();
           };
 
-          this.setSchema = function(value) {
-            schema = _.isObject(value) ? value : tartan.schema.default;
-            update();
-          };
+          updateSchema();
+
+          $scope.$watch('schema', function(newValue, oldValue) {
+            if (newValue !== oldValue) {
+              updateSchema();
+            }
+          });
+
+          $scope.$watch('options', function(newValue, oldValue) {
+            if (newValue !== oldValue) {
+              updateSchema();
+            }
+          }, true);
 
           $scope.$watch('source', function(newValue, oldValue) {
             if (newValue !== oldValue) {
-              update();
+              updateSource();
             }
           });
         }

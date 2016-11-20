@@ -1,9 +1,9 @@
 'use strict';
 
 var _ = require('lodash');
-var module = require('../../module');
+var ngTartan = require('../../module');
 
-module.directive('tartanErrorHandlerConsole', [
+ngTartan.directive('tartanErrorHandlerConsole', [
   function() {
     return {
       restrict: 'E',

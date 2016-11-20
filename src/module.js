@@ -2,4 +2,6 @@
 
 var angular = require('angular');
 
-module.exports = angular.module('angular-tartan', []);
+var ngTartan = angular.module('angular-tartan', []);
+
+module.exports = ngTartan;
