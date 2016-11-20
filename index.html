@@ -115,11 +115,6 @@
   </div>
   </div>
 
-  <tartan-image
-    width="source" height="source"
-    source="{{ schema + '/' + weave.join(',') + '/' + source }}"
-  ></tartan-image>
-
   <tartan source="{{ source }}" schema="{{ schema }}">
     <tartan-error-handler-collect model="errors"></tartan-error-handler-collect>
 
@@ -172,8 +167,8 @@
     ]);
 
     app.controller('DemoController', [
-      '$scope', '$location',
-      function($scope, $location) {
+      '$scope', '$location', 'tartan',
+      function($scope, $location, tartan) {
         $scope.source = _.trim($location.search().sett || '');
         if ($scope.source == '') {
           $scope.source = 'K#101010 BLACK; B#2c2c80 BLUE; G#006818 GREEN;\n' +
