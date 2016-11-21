@@ -101,7 +101,7 @@ ngTartan.directive('tartanPreviewControl', [
         '<div class="tartan-preview-control">' +
           '<canvas></canvas>' +
         '</div>',
-      replace: false,
+      replace: true,
       scope: {
         weave: '=?',
         repeat: '=?',
@@ -149,16 +149,15 @@ ngTartan.directive('tartanPreviewControl', [
           updateCanvasSize();
         }
 
-        controller.requestUpdate(function(state) {
-          currentState = state;
-          update();
-        });
-
-        controller.on('tartan.changed', function(state) {
+        function tartanChanged(state) {
           currentState = state;
           update();
           $scope.$applyAsync();
-        });
+        }
+
+        controller.on('tartan.changed', tartanChanged);
+
+        controller.requestUpdate(tartanChanged);
 
         $scope.$watch('weave', function(newValue, oldValue) {
           if (newValue !== oldValue) {
@@ -250,6 +249,7 @@ ngTartan.directive('tartanPreviewControl', [
         }
 
         $scope.$on('$destroy', function() {
+          controller.off('tartan.changed', tartanChanged);
           if (disableDrag) {
             disableDrag();
           }

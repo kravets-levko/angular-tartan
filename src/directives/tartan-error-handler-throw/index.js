@@ -11,12 +11,20 @@ ngTartan.directive('tartanErrorHandlerThrow', [
       replace: false,
       scope: {},
       link: function($scope, element, attr, controller) {
-        controller.setErrorHandler(function(error, data, severity) {
+        function errorHandler(error, data, severity) {
           if (error instanceof Error) {
             error.data = data;
             error.severity = severity;
           }
           throw error;
+        }
+
+        controller.setErrorHandler(errorHandler);
+
+        $scope.$on('$destroy', function() {
+          if (controller.getErrorHandler === errorHandler) {
+            controller.setErrorHandler(null);
+          }
         });
       }
     };

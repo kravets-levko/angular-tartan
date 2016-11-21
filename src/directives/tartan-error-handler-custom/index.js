@@ -18,7 +18,14 @@ ngTartan.directive('tartanErrorHandlerCustom', [
             controller.setErrorHandler($scope.handler);
           }
         });
+
         controller.setErrorHandler($scope.handler);
+
+        $scope.$on('$destroy', function() {
+          if (controller.getErrorHandler === $scope.handler) {
+            controller.setErrorHandler(null);
+          }
+        });
       }
     };
   }

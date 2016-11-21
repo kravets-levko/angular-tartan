@@ -15,13 +15,15 @@ ngTartan.directive('tartanErrorHandlerCollect', [
       link: function($scope, element, attr, controller) {
         var temp = [];
 
-        controller.setErrorHandler(function(error, data, severity) {
+        function errorHandler(error, data, severity) {
           if (error instanceof Error) {
             error.data = data;
             error.severity = severity;
           }
           temp.push(error);
-        });
+        }
+
+        controller.setErrorHandler(errorHandler);
 
         controller.on('tartan.beginUpdate', function() {
           temp = [];
@@ -32,6 +34,12 @@ ngTartan.directive('tartanErrorHandlerCollect', [
           $scope.model = temp;
           temp = [];
           $scope.$applyAsync();
+        });
+
+        $scope.$on('$destroy', function() {
+          if (controller.getErrorHandler === errorHandler) {
+            controller.setErrorHandler(null);
+          }
         });
       }
     };

@@ -9,18 +9,22 @@ ngTartan.directive('tartanFormatted', [
       restrict: 'E',
       require: '^^tartan',
       template: '<pre></pre>',
-      replace: false,
+      replace: true,
       scope: {},
       link: function($scope, element, attr, controller) {
         var target = element.find('pre');
 
-        function update(state) {
+        function tartanChanged(state) {
           target.text(state.formatted);
         }
 
-        controller.on('tartan.changed', update);
+        controller.on('tartan.changed', tartanChanged);
 
-        controller.requestUpdate(update);
+        controller.requestUpdate(tartanChanged);
+
+        $scope.$on('$destroy', function() {
+          controller.off('tartan.changed', tartanChanged);
+        });
       }
     };
   }

@@ -27,10 +27,18 @@ ngTartan.directive('tartanErrorHandlerConsole', [
           }
         }
 
-        controller.setErrorHandler(function(error, data, severity) {
+        function errorHandler(error, data, severity) {
           var method = map[severity] || def;
           if (method) {
             console[method](error);
+          }
+        }
+
+        controller.setErrorHandler(errorHandler);
+
+        $scope.$on('$destroy', function() {
+          if (controller.getErrorHandler === errorHandler) {
+            controller.setErrorHandler(null);
           }
         });
       }

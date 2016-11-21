@@ -10,7 +10,7 @@ ngTartan.directive('tartanPreviewImage', [
       restrict: 'E',
       require: '^^tartan',
       template: '<canvas class="tartan-preview-image"></canvas>',
-      replace: false,
+      replace: true,
       scope: {
         weave: '=?',
         metrics: '=?'
@@ -35,16 +35,15 @@ ngTartan.directive('tartanPreviewImage', [
           updateCanvasSize();
         }
 
-        controller.requestUpdate(function(state) {
-          currentState = state;
-          update();
-        });
-
-        controller.on('tartan.changed', function(state) {
+        function tartanChanged(state) {
           currentState = state;
           update();
           $scope.$applyAsync();
-        });
+        }
+
+        controller.on('tartan.changed', tartanChanged);
+
+        controller.requestUpdate(tartanChanged);
 
         $scope.$watch('weave', function(newValue, oldValue) {
           if (newValue !== oldValue) {
@@ -63,6 +62,10 @@ ngTartan.directive('tartanPreviewImage', [
           }
           repaint();
         }
+
+        $scope.$on('$destroy', function() {
+          controller.off('tartan.changed', tartanChanged);
+        });
       }
     };
   }

@@ -23,6 +23,7 @@ ngTartan.directive('tartan', [
 
           // Allow controller to emit events
           _.extend(self, new EventEmitter());
+          self.off = self.removeListener;
 
           var errorHandler = null;
           var parse = null;
@@ -72,6 +73,10 @@ ngTartan.directive('tartan', [
             if (_.isFunction(callback)) {
               callback(state);
             }
+          };
+
+          this.getErrorHandler = function() {
+            return errorHandler;
           };
 
           this.setErrorHandler = function(value) {
