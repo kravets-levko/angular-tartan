@@ -12,10 +12,9 @@ ngTartan.directive('tartanFormatted', [
       replace: true,
       scope: {},
       link: function($scope, element, attr, controller) {
-        var target = element.find('pre');
 
         function tartanChanged(state) {
-          target.text(state.formatted);
+          element.text(state.formatted);
         }
 
         controller.on('tartan.changed', tartanChanged);
