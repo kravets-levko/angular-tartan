@@ -18,7 +18,9 @@ ngTartan.directive('tartanImage', [
         // auto - to keep aspect ratio;
         // source - to use source dimension
         width: '@?',
-        height: '@?'
+        height: '@?',
+        renderer: '@?',
+        zoom: '@?'
       },
       link: function($scope, element) {
         var canvas = element.get(0);
@@ -55,11 +57,23 @@ ngTartan.directive('tartanImage', [
 
           var sett = schema.parse()(source);
           var options = {
+            zoom: $scope.zoom,
             weave: weave,
             defaultColors: schema.colors,
             transformSyntaxTree: tartan.transform.flatten()
           };
-          render = tartan.render.canvas(sett, options);
+
+          var renderer = tartan.render[$scope.renderer];
+          if (!_.isFunction(renderer)) {
+            renderer = _.find(tartan.render, {
+              id: $scope.renderer
+            });
+            if (!_.isFunction(renderer)) {
+              renderer = tartan.render.canvas;
+            }
+          }
+
+          render = renderer(sett, options);
           metrics.width = render.metrics.warp.length;
           metrics.height = render.metrics.weft.length;
         }
@@ -109,23 +123,21 @@ ngTartan.directive('tartanImage', [
           repaint();
         }
 
-        $scope.$watch('source', function(newValue, oldValue) {
-          if (newValue !== oldValue) {
-            updateSource($scope.source);
-            updateCanvasSize();
-          }
+        _.each(['source', 'zoom', 'renderer'], function(name) {
+          $scope.$watch(name, function(newValue, oldValue) {
+            if (newValue !== oldValue) {
+              updateSource($scope.source);
+              updateCanvasSize();
+            }
+          }, true);
         });
 
-        $scope.$watch('width', function(newValue, oldValue) {
-          if (newValue !== oldValue) {
-            updateCanvasSize();
-          }
-        });
-
-        $scope.$watch('height', function(newValue, oldValue) {
-          if (newValue !== oldValue) {
-            updateCanvasSize();
-          }
+        _.each(['width', 'height'], function(name) {
+          $scope.$watch(name, function(newValue, oldValue) {
+            if (newValue !== oldValue) {
+              updateCanvasSize();
+            }
+          }, true);
         });
 
         updateSource($scope.source);

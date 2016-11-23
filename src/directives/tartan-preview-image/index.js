@@ -13,7 +13,9 @@ ngTartan.directive('tartanPreviewImage', [
       replace: true,
       scope: {
         weave: '=?',
-        metrics: '=?'
+        metrics: '=?',
+        zoom: '=?',
+        renderer: '=?'
       },
       link: function($scope, element, attr, controller) {
         var canvas = element.find('canvas').get(0);
@@ -26,11 +28,22 @@ ngTartan.directive('tartanPreviewImage', [
 
         function update() {
           var options = {
+            zoom: $scope.zoom,
             weave: $scope.weave,
             defaultColors: currentState.colors,
             transformSyntaxTree: tartan.transform.flatten()
           };
-          render = tartan.render.canvas(currentState.sett, options);
+          var renderer = tartan.render[$scope.renderer];
+          if (!_.isFunction(renderer)) {
+            renderer = _.find(tartan.render, {
+              id: $scope.renderer
+            });
+            if (!_.isFunction(renderer)) {
+              renderer = tartan.render.canvas;
+            }
+          }
+
+          render = renderer(currentState.sett, options);
           $scope.metrics = render.metrics;
           updateCanvasSize();
         }
@@ -45,11 +58,13 @@ ngTartan.directive('tartanPreviewImage', [
 
         controller.requestUpdate(tartanChanged);
 
-        $scope.$watch('weave', function(newValue, oldValue) {
-          if (newValue !== oldValue) {
-            update();
-          }
-        }, true);
+        _.each(['weave', 'zoom', 'renderer'], function(name) {
+          $scope.$watch(name, function(newValue, oldValue) {
+            if (newValue !== oldValue) {
+              update();
+            }
+          }, true);
+        });
 
         function updateCanvasSize() {
           var w = Math.ceil(canvas.offsetWidth);

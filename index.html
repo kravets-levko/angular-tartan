@@ -97,6 +97,15 @@
       Weave:&nbsp;<select ng-model="weave"
         ng-options="item.value as item.name for item in availableWeaves"></select>
     </label>
+
+    <label>
+      Renderer:&nbsp;<select ng-model="renderer"
+      ng-options="item.id as item.name for item in availableRenderers"></select>
+    </label>
+    <label>
+      Zoom:&nbsp;<select ng-model="zoom"
+      ng-options="value for value in availableZoom"></select>
+    </label>
   </div>
   <div style="margin-bottom: 10px;">
     <label>
@@ -122,6 +131,7 @@
       ng-class="{'infinite-image': inifinteImage && draggableImage}">
       <tartan-preview-control repeat="inifinteImage" offset="renderingOffset"
         interactive="{resize: true, drag: draggableImage}" metrics="metrics"
+        zoom="zoom" renderer="renderer"
         weave="weave"></tartan-preview-control>
     </div>
 
@@ -214,6 +224,23 @@
             console.log($scope.metrics);
           }
         });
+
+        $scope.availableRenderers = _.chain(tartan.render)
+          .map(function(value) {
+            if (value.id) {
+              return {
+                id: value.id,
+                name: value.name
+              };
+            }
+            return null;
+          })
+          .filter()
+          .value();
+        $scope.renderer = 'canvas';
+
+        $scope.availableZoom = [1, 2, 3, 4, 5];
+        $scope.zoom = 1;
 
         $scope.availableWeaves = _.map(tartan.defaults.weave,
           function(value, key) {

@@ -107,7 +107,9 @@ ngTartan.directive('tartanPreviewControl', [
         repeat: '=?',
         offset: '=?',
         metrics: '=?',
-        interactive: '=?'
+        interactive: '=?',
+        zoom: '=?',
+        renderer: '=?'
       },
       link: function($scope, element, attr, controller) {
         element.css({
@@ -140,11 +142,23 @@ ngTartan.directive('tartanPreviewControl', [
 
         function update() {
           var options = {
+            zoom: $scope.zoom,
             weave: $scope.weave,
             defaultColors: currentState.colors,
             transformSyntaxTree: tartan.transform.flatten()
           };
-          render = tartan.render.canvas(currentState.sett, options);
+
+          var renderer = tartan.render[$scope.renderer];
+          if (!_.isFunction(renderer)) {
+            renderer = _.find(tartan.render, {
+              id: $scope.renderer
+            });
+            if (!_.isFunction(renderer)) {
+              renderer = tartan.render.canvas;
+            }
+          }
+
+          render = renderer(currentState.sett, options);
           $scope.metrics = render.metrics;
           updateCanvasSize();
         }
@@ -159,16 +173,12 @@ ngTartan.directive('tartanPreviewControl', [
 
         controller.requestUpdate(tartanChanged);
 
-        $scope.$watch('weave', function(newValue, oldValue) {
-          if (newValue !== oldValue) {
-            update();
-          }
-        }, true);
-
-        $scope.$watch('repeat', function(newValue, oldValue) {
-          if (newValue !== oldValue) {
-            update();
-          }
+        _.each(['weave', 'repeat', 'zoom', 'renderer'], function(name) {
+          $scope.$watch(name, function(newValue, oldValue) {
+            if (newValue !== oldValue) {
+              update();
+            }
+          }, true);
         });
 
         $scope.$watch('offset', function(newValue, oldValue) {
