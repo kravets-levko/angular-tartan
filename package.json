@@ -1,6 +1,6 @@
 {
   "name": "angular-tartan",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Angular bindings for tartan library.",
   "keywords": [
     "angular",
@@ -20,7 +20,7 @@
     "build:dist": "NODE_ENV=production webpack --hide-modules --config webpack.config.production.js",
     "build": "npm run build:dev && npm run build:dist",
     "prepublish": "npm run build",
-    "review": "eslint src"
+    "review": "eslint src webpack.config.base.js webpack.config.development.js webpack.config.production.js"
   },
   "author": {
     "name": "Levko Kravets",

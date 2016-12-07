@@ -1,6 +1,5 @@
 'use strict';
 
-var _ = require('lodash');
 var ngTartan = require('../../module');
 
 ngTartan.directive('tartanFormatted', [
@@ -12,7 +11,6 @@ ngTartan.directive('tartanFormatted', [
       replace: true,
       scope: {},
       link: function($scope, element, attr, controller) {
-
         function tartanChanged(state) {
           element.text(state.formatted);
         }

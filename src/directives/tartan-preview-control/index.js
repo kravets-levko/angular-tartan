@@ -113,7 +113,7 @@ ngTartan.directive('tartanPreviewControl', [
       },
       link: function($scope, element, attr, controller) {
         element.css({
-          'position': 'relative'
+          position: 'relative'
         });
 
         var target = element.find('canvas');
@@ -209,12 +209,10 @@ ngTartan.directive('tartanPreviewControl', [
             if (!disableResize) {
               disableResize = makeResizable($window, updateCanvasSize);
             }
-          } else {
-            if (disableResize) {
-              // Disable it later, but NULL it now
-              disable.push(disableResize);
-              disableResize = null;
-            }
+          } else if (disableResize) {
+            // Disable it later, but NULL it now
+            disable.push(disableResize);
+            disableResize = null;
           }
 
           if (interactive.drag) {
@@ -223,12 +221,10 @@ ngTartan.directive('tartanPreviewControl', [
                 return offset;
               }, repaint);
             }
-          } else {
-            if (disableDrag) {
-              // Disable it later, but NULL it now
-              disable.push(disableDrag);
-              disableDrag = null;
-            }
+          } else if (disableDrag) {
+            // Disable it later, but NULL it now
+            disable.push(disableDrag);
+            disableDrag = null;
           }
           repaint();
 

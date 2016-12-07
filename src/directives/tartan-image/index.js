@@ -104,7 +104,7 @@ ngTartan.directive('tartanImage', [
             h = canvas.offsetHeight;
           } else
           if (sw == 'auto') {
-            w = height * metrics.width / metrics.height;
+            w = h * metrics.width / metrics.height;
           } else
           if (sh == 'auto') {
             h = w * metrics.height / metrics.width;

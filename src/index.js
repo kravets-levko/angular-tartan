@@ -2,6 +2,6 @@
 
 var _ = require('lodash');
 
-_.extend(module.exports, require('./package'));
+_.extend(module.exports, require('./@package'));
 
 require('./directives');

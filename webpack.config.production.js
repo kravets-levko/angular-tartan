@@ -9,10 +9,12 @@ var productionConfig = {
     filename: 'angular-tartan.min.js',
     path: './dist'
   },
-  plugins:  [
+  plugins: [
     new webpack.optimize.UglifyJsPlugin({
       compressor: {
+        /* eslint-disable camelcase */
         screw_ie8: true,
+        /* eslint-enable camelcase */
         warnings: false
       }
     })
