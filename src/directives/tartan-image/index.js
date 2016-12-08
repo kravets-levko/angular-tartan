@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var angular = require('angular');
 var tartan = require('tartan');
 var ngTartan = require('../../module');
 
@@ -32,7 +32,7 @@ ngTartan.directive('tartanImage', [
         });
 
         function updateSource(source) {
-          source = _.isString(source) ? source : '';
+          source = angular.isString(source) ? source : '';
           var matches = parseSourcePattern.exec(source);
           if (matches) {
             source = [matches[3], matches[2], matches[1]];
@@ -41,17 +41,18 @@ ngTartan.directive('tartanImage', [
           }
 
           var schema = tartan.schema[source.pop().toLowerCase()] || null;
-          if (!_.isObject(schema)) {
+          if (!angular.isObject(schema)) {
             schema = tartan.schema.classic;
           }
-          var weave = _.chain(source.pop())
+          var weave = source.pop()
             .split(',')
             .map(function(value) {
               value = parseInt(value, 10);
               return value > 0 ? value : 0;
             })
-            .filter()
-            .value();
+            .filter(function(value) {
+              return value > 0;
+            });
 
           source = source.join('/');
 
@@ -64,11 +65,18 @@ ngTartan.directive('tartanImage', [
           };
 
           var renderer = tartan.render[$scope.renderer];
-          if (!_.isFunction(renderer)) {
-            renderer = _.find(tartan.render, {
-              id: $scope.renderer
-            });
-            if (!_.isFunction(renderer)) {
+          if (!angular.isFunction(renderer)) {
+            renderer = null;
+            for (var key in tartan.render) {
+              if (
+                angular.isFunction(tartan.render[key]) &&
+                (tartan.render[key].id == $scope.renderer)
+              ) {
+                renderer = tartan.render[key];
+                break;
+              }
+            }
+            if (!angular.isFunction(renderer)) {
               renderer = tartan.render.canvas;
             }
           }
@@ -123,7 +131,7 @@ ngTartan.directive('tartanImage', [
           repaint();
         }
 
-        _.each(['source', 'zoom', 'renderer'], function(name) {
+        ['source', 'zoom', 'renderer'].forEach(function(name) {
           $scope.$watch(name, function(newValue, oldValue) {
             if (newValue !== oldValue) {
               updateSource($scope.source);
@@ -132,7 +140,7 @@ ngTartan.directive('tartanImage', [
           }, true);
         });
 
-        _.each(['width', 'height'], function(name) {
+        ['width', 'height'].forEach(function(name) {
           $scope.$watch(name, function(newValue, oldValue) {
             if (newValue !== oldValue) {
               updateCanvasSize();

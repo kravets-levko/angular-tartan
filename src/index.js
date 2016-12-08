@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('lodash');
+var angular = require('angular');
 
-_.extend(module.exports, require('./@package'));
+angular.extend(module.exports, require('./@package'));
 
 require('./directives');

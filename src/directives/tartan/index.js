@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var angular = require('angular');
 var tartan = require('tartan');
 var EventEmitter = require('events');
 var ngTartan = require('../../module');
@@ -22,8 +22,10 @@ ngTartan.directive('tartan', [
           var self = this;
 
           // Allow controller to emit events
-          _.extend(self, new EventEmitter());
-          self.off = self.removeListener;
+          self._events = new EventEmitter();
+          self.emit = angular.bind(self._events, self._events.emit);
+          self.on = angular.bind(self._events, self._events.addListener);
+          self.off = angular.bind(self._events, self._events.removeListener);
 
           var errorHandler = null;
           var parse = null;
@@ -39,10 +41,10 @@ ngTartan.directive('tartan', [
 
           function updateSchema() {
             var schema = tartan.schema[$scope.schema] || tartan.schema.classic;
-            parse = schema.parse(_.extend({}, $scope.options, {
+            parse = schema.parse(angular.extend({}, $scope.options, {
               errorHandler: errorHandler
             }));
-            format = schema.format(_.extend({}, $scope.options));
+            format = schema.format(angular.extend({}, $scope.options));
 
             state = {
               schema: schema,
@@ -59,7 +61,7 @@ ngTartan.directive('tartan', [
             self.emit('tartan.beginUpdate');
 
             var sett = parse($scope.source);
-            state = _.extend({}, state, {
+            state = angular.extend({}, state, {
               source: $scope.source,
               sett: sett,
               formatted: format(sett)
@@ -70,7 +72,7 @@ ngTartan.directive('tartan', [
           }
 
           this.requestUpdate = function(callback) {
-            if (_.isFunction(callback)) {
+            if (angular.isFunction(callback)) {
               callback(state);
             }
           };

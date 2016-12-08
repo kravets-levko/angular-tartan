@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var angular = require('angular');
 var tartan = require('tartan');
 var ngTartan = require('../../module');
 
@@ -80,7 +80,7 @@ function makeDraggable(window, canvas, getOffset, repaint) {
 
 function makeResizable(window, update) {
   function onResize() {
-    if (_.isFunction(update)) {
+    if (angular.isFunction(update)) {
       update();
     }
   }
@@ -129,7 +129,7 @@ ngTartan.directive('tartanPreviewControl', [
         };
 
         function updateOffset() {
-          $scope.offset = _.clone(offset);
+          $scope.offset = angular.extend({}, offset);
         }
 
         var repaint = tartan.utils.repaint(function() {
@@ -149,11 +149,18 @@ ngTartan.directive('tartanPreviewControl', [
           };
 
           var renderer = tartan.render[$scope.renderer];
-          if (!_.isFunction(renderer)) {
-            renderer = _.find(tartan.render, {
-              id: $scope.renderer
-            });
-            if (!_.isFunction(renderer)) {
+          if (!angular.isFunction(renderer)) {
+            renderer = null;
+            for (var key in tartan.render) {
+              if (
+                angular.isFunction(tartan.render[key]) &&
+                (tartan.render[key].id == $scope.renderer)
+              ) {
+                renderer = tartan.render[key];
+                break;
+              }
+            }
+            if (!angular.isFunction(renderer)) {
               renderer = tartan.render.canvas;
             }
           }
@@ -173,7 +180,7 @@ ngTartan.directive('tartanPreviewControl', [
 
         controller.requestUpdate(tartanChanged);
 
-        _.each(['weave', 'repeat', 'zoom', 'renderer'], function(name) {
+        ['weave', 'repeat', 'zoom', 'renderer'].forEach(function(name) {
           $scope.$watch(name, function(newValue, oldValue) {
             if (newValue !== oldValue) {
               update();
@@ -183,7 +190,7 @@ ngTartan.directive('tartanPreviewControl', [
 
         $scope.$watch('offset', function(newValue, oldValue) {
           if (newValue !== oldValue) {
-            var temp = _.extend({}, offset, newValue);
+            var temp = angular.extend({}, offset, newValue);
             if ((temp.x != offset.x) || (temp.y != offset.y)) {
               offset = temp;
               repaint();
@@ -195,7 +202,7 @@ ngTartan.directive('tartanPreviewControl', [
         var disableDrag = null;
 
         $scope.$watch('interactive', function() {
-          var interactive = _.extend({
+          var interactive = angular.extend({
             resize: false,
             drag: false
           }, $scope.interactive === true ? {
@@ -230,7 +237,7 @@ ngTartan.directive('tartanPreviewControl', [
 
           // Safely run each callback - even if one of them will
           // crash - it doesn't matter at the moment
-          _.each(disable, function(disable) {
+          disable.forEach(function(disable) {
             disable();
           });
         });

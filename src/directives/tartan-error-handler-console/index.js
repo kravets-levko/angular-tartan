@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var angular = require('angular');
 var ngTartan = require('../../module');
 
 ngTartan.directive('tartanErrorHandlerConsole', [
@@ -14,15 +14,15 @@ ngTartan.directive('tartanErrorHandlerConsole', [
       link: function($scope, element, attr, controller) {
         var map = {};
         var def = null;
-        if (_.isObject(console)) {
-          def = _.isFunction(console.trace) ? 'trace' : 'log';
-          if (_.isFunction(console.error)) {
+        if (angular.isObject(console)) {
+          def = angular.isFunction(console.trace) ? 'trace' : 'log';
+          if (angular.isFunction(console.error)) {
             map.error = 'error';
           }
-          if (_.isFunction(console.warn)) {
+          if (angular.isFunction(console.warn)) {
             map.warning = 'warn';
           }
-          if (_.isFunction(console.info)) {
+          if (angular.isFunction(console.info)) {
             map.notice = 'info';
           }
         }

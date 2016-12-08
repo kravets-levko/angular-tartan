@@ -12,9 +12,8 @@ module.exports = {
   externals: {
     // require('angular') is external and available on the global var `angular`
     angular: 'angular',
-    // same `tartan` and `lodash`
-    tartan: 'tartan',
-    lodash: '_'
+    // same `tartan`
+    tartan: 'tartan'
   },
   module: {
     loaders: [
