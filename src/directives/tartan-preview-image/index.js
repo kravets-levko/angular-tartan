@@ -35,18 +35,18 @@ ngTartan.directive('tartanPreviewImage', [
           };
           var renderer = tartan.render[$scope.renderer];
           if (!angular.isFunction(renderer)) {
-            renderer = null;
-            for (var key in tartan.render) {
-              if (
-                angular.isFunction(tartan.render[key]) &&
-                (tartan.render[key].id == $scope.renderer)
-              ) {
-                renderer = tartan.render[key];
-                break;
+            renderer = tartan.render.canvas;
+            if (angular.isString($scope.renderer)) {
+              for (var key in tartan.render) {
+                if (
+                  angular.isFunction(tartan.render[key]) &&
+                  angular.isString(tartan.render[key].id) &&
+                  (tartan.render[key].id == $scope.renderer)
+                ) {
+                  renderer = tartan.render[key];
+                  break;
+                }
               }
-            }
-            if (!angular.isFunction(renderer)) {
-              renderer = tartan.render.canvas;
             }
           }
 
