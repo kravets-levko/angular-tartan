@@ -87,7 +87,7 @@ function makeResizable(window, update) {
 
   window.addEventListener('resize', onResize);
   return function() {
-    window.removeEventListener('mousedown', onResize);
+    window.removeEventListener('resize', onResize);
   };
 }
 
